@@ -21,10 +21,8 @@
 
 namespace BPN;
 
-if (!file_exists ('qero-packages/autoload.php'))
-    throw new \Exception ('You should previously install all required qero packages');
-
-require 'qero-packages/autoload.php';
+if (file_exists ('qero-packages/autoload.php'))
+    require_once 'qero-packages/autoload.php';
 
 require 'php/Socket.php';
 require 'php/Node.php';
