@@ -89,7 +89,7 @@ class BitPoint
                 if (!isset ($self_users[$user->ip]))
                     $self_users[$user->ip] = $user;
 
-            self::$db->set ('users', $self_users);
+            self::$db->set ('users', new Item ($self_users));
             self::$db->save ();
         }
 
