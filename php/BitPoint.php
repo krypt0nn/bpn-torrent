@@ -50,7 +50,6 @@ class BitPoint
                     }
 
                     $users = (self::$db->get ('users') ?? new Item ([]))->getData ();
-
                     unset ($users[$ip]);
 
                     $client->write (new Http . $this->encode ($users));
@@ -59,13 +58,18 @@ class BitPoint
                         'type' => 'is_available'
                     ]) ? true : false));
 
+                    foreach ($request['users'] as $ip => $user)
+                        $users[$ip] = new User ($ip, $user->port, @file_get_contents ('http://'. $ip .':'. $user->port .'/'. $this->encode ([
+                            'type' => 'is_available'
+                        ]) ? true : false));
+
                     self::$db->set ('users', new Item ($users));
                     self::$db->save ();
 
                     break;
 
                 default:
-                    if (isset ($request['type']))
+                    if ($callback)
                         $callback ($request, $client);
 
                     break;
@@ -130,8 +134,9 @@ class BitPoint
     public function connect (string $ip, int $port = 53236): BitPoint
     {
         $response = $this->decode (file_get_contents ('http://'. $ip .':'. $port .'/'. $this->encode ([
-            'type' => 'connect',
-            'port' => self::$node->port
+            'type'  => 'connect',
+            'port'  => self::$node->port,
+            'users' => $this->users ()
         ])));
 
         if (!isset ($response['error']))
