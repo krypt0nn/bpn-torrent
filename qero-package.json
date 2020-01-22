@@ -1,7 +1,3 @@
 {
-    "version": "0.1",
-    "requires": [
-        "KRypt0nn\/DStructure",
-        "KRypt0nn\/Flurex"
-    ]
+    "version": "0.1"
 }
