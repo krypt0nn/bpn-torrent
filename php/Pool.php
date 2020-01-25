@@ -10,7 +10,7 @@ class Pool
     public bool $supportSockets = false;
 
     public array $clients = [];
-    public int $requestsRepeats = 5;
+    public int $requestsRepeats = 3;
 
     public function __construct (string $ip, int $port = 53236, int $selfPort = 53236, bool $supportSockets = false)
     {
