@@ -74,6 +74,8 @@ class Tracker
                     $client->write (new Http . Tracker::encode (isset ($self->stack[$ip .':'. $port]) ?
                         $self->stack[$ip .':'. $port] : array ()));
 
+                    unset ($self->stack[$ip .':'. $port]);
+
                     break;
 
                 default:
