@@ -29,10 +29,10 @@ class Pool
             'support_sockets' => $this->supportSockets
         ))));
 
-        foreach ($response as $client)
+        foreach ($response as $clientInfo)
         {
             $client = new User;
-            $client = $client->fromArray ($client);
+            $client = $client->fromArray ($clientInfo);
 
             $this->clients[$client->ip .':'. $client->port] = $client;
         }
