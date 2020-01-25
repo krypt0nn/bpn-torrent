@@ -10,7 +10,7 @@ class Pool
     public $supportSockets = false;
     
     public $clients = array ();
-    public $requestsRepeats = 5;
+    public $requestsRepeats = 3;
 
     public function __construct ($ip, $port = 53236, $selfPort = 53236, $supportSockets = false)
     {
@@ -35,7 +35,9 @@ class Pool
             )));
         }
 
-        while ((!$response || @Tracker::decode ($response) != 'ok') && $count++ < $this->requestsRepeats);
+        while (!$response && $count++ < $this->requestsRepeats);
+
+        $response = @Tracker::decode ($response);
 
         if (is_array ($response))
             foreach ($response as $clientInfo)
