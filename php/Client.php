@@ -77,7 +77,7 @@ class Client
 
     public function listen ($callback = null, $cycle = false)
     {
-        $this->node->listen (function (string $request, Socket $client) use ($callback)
+        $this->node->listen (function ($request, $client) use ($callback)
         {
             $request = Tracker::decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
 
