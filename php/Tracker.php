@@ -17,7 +17,9 @@ class Tracker
 
     public function listen ($callback = null, $cycle = false)
     {
-        $this->node->listen (function ($request, $client) use ($callback)
+        $self = &$this;
+
+        $this->node->listen (function ($request, $client) use ($callback, &$self)
         {
             $request = Tracker::decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
 
@@ -27,8 +29,8 @@ class Tracker
             socket_getpeername ($client->socket, $ip);
             $port = min (max ((int) $request['port'], 1), 65535);
 
-            if (isset ($this->clients[$ip .':'. $port]))
-                $this->clients[$ip .':'. $port]->lastUpdate = time ();
+            if (isset ($self->clients[$ip .':'. $port]))
+                $self->clients[$ip .':'. $port]->lastUpdate = time ();
 
             if (!isset ($request['type']))
                 $request['type'] = null;
@@ -44,21 +46,21 @@ class Tracker
                     if (!isset ($request['support_sockets']))
                         $request['support_sockets'] = false;
                     
-                    $this->clients[$ip .':'. $port] = new User ($ip, $port);
-                    $this->clients[$ip .':'. $port]->supportSockets = (bool) $request['support_sockets'];
+                    $self->clients[$ip .':'. $port] = new User ($ip, $port);
+                    $self->clients[$ip .':'. $port]->supportSockets = (bool) $request['support_sockets'];
 
                     $client->write (new Http . Tracker::encode (array_map (function ($client)
                     {
                         return $client->toArray ();
-                    }, $this->clients)));
+                    }, $self->clients)));
 
                     break;
 
                 case 'push':
-                    if (!isset ($request['reciever']) || !isset ($request['data']) || !isset ($request['mask']) || !isset ($this->clients[$request['reciever']]))
+                    if (!isset ($request['reciever']) || !isset ($request['data']) || !isset ($request['mask']) || !isset ($self->clients[$request['reciever']]))
                         break;
 
-                    $this->stack[$request['reciever']][] = array
+                    $self->stack[$request['reciever']][] = array
                     (
                         'timestamp' => time (),
                         'author'    => $ip .':'. $port,
@@ -69,8 +71,8 @@ class Tracker
                     break;
 
                 case 'pop':
-                    $client->write (new Http . Tracker::encode (isset ($this->stack[$ip .':'. $port]) ?
-                        $this->stack[$ip .':'. $port] : array ()));
+                    $client->write (new Http . Tracker::encode (isset ($self->stack[$ip .':'. $port]) ?
+                        $self->stack[$ip .':'. $port] : array ()));
 
                     break;
 
