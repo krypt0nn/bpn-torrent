@@ -65,7 +65,7 @@ class Socket
         return $read;
     }
 
-    public function write (string $data)
+    public function write ($data)
     {
         socket_write ($this->socket, $data);
 
