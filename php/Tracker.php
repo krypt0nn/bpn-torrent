@@ -19,7 +19,7 @@ class Tracker
     {
         $this->node->listen (function ($request, $client) use ($callback)
         {
-            $request = $this->decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
+            $request = Tracker::decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
 
             if (!isset ($request['port']))
                 $request['port'] = 53236;
@@ -36,7 +36,7 @@ class Tracker
             switch ($request['type'])
             {
                 case 'available':
-                    $client->write (new Http . $this->encode ('yes'));
+                    $client->write (new Http . Tracker::encode ('yes'));
 
                     break;
 
@@ -47,7 +47,7 @@ class Tracker
                     $this->clients[$ip .':'. $port] = new User ($ip, $port);
                     $this->clients[$ip .':'. $port]->supportSockets = (bool) $request['support_sockets'];
 
-                    $client->write (new Http . $this->encode (array_map (function ($client)
+                    $client->write (new Http . Tracker::encode (array_map (function ($client)
                     {
                         return $client->toArray ();
                     }, $this->clients)));
@@ -69,7 +69,7 @@ class Tracker
                     break;
 
                 case 'pop':
-                    $client->write (new Http . $this->encode (isset ($this->stack[$ip .':'. $port]) ?
+                    $client->write (new Http . Tracker::encode (isset ($this->stack[$ip .':'. $port]) ?
                         $this->stack[$ip .':'. $port] : array ()));
 
                     break;
