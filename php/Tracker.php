@@ -58,6 +58,8 @@ class Tracker
                 case 'pop':
                     $client->write (new Http . $this->encode ($this->stack[$ip .':'. $port] ?? []));
 
+                    unset ($this->stack[$ip .':'. $port]);
+
                     break;
 
                 default:
