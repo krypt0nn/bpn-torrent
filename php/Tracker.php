@@ -38,7 +38,7 @@ class Tracker
             switch ($request['type'])
             {
                 case 'available':
-                    $client->write (new Http . Tracker::encode ('yes'));
+                    $client->write (new Http . Tracker::encode ('ok'));
 
                     break;
 
@@ -67,6 +67,8 @@ class Tracker
                         'data'      => $request['data'],
                         'mask'      => crc32 ($request['mask'])
                     );
+
+                    $client->write (new Http . Tracker::encode ('ok'));
 
                     break;
 
