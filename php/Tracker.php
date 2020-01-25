@@ -4,30 +4,36 @@ namespace BPN;
 
 class Tracker
 {
-    public Node $node;
-    public array $clients = [];
-    public array $stack   = [];
+    public $node;
+    public $clients = array ();
+    public $stack   = array ();
 
-    public int $stackTtl = 3600;
+    public $stackTtl = 3600;
 
-    public function __construct (int $port = 53236)
+    public function __construct ($port = 53236)
     {
         $this->node = new Node ($port);
     }
 
-    public function listen (callable $callback = null, bool $cycle = false): Tracker
+    public function listen ($callback = null, $cycle = false)
     {
         $this->node->listen (function (string $request, Socket $client) use ($callback)
         {
             $request = $this->decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
 
+            if (!isset ($request['port']))
+                $request['port'] = 53236;
+
             socket_getpeername ($client->socket, $ip);
-            $port = min (max ((int) $request['port'], 1), 65535) ?? 53236;
+            $port = min (max ((int) $request['port'], 1), 65535);
 
             if (isset ($this->clients[$ip .':'. $port]))
                 $this->clients[$ip .':'. $port]->lastUpdate = time ();
 
-            switch ($request['type'] ?? null)
+            if (!isset ($request['type']))
+                $request['type'] = null;
+
+            switch ($request['type'])
             {
                 case 'available':
                     $client->write (new Http . $this->encode ('yes'));
@@ -35,10 +41,16 @@ class Tracker
                     break;
 
                 case 'connect':
+                    if (!isset ($request['support_sockets']))
+                        $request['support_sockets'] = false;
+                    
                     $this->clients[$ip .':'. $port] = new User ($ip, $port);
-                    $this->clients[$ip .':'. $port]->supportSockets = (bool) $request['support_sockets'] ?? false;
+                    $this->clients[$ip .':'. $port]->supportSockets = (bool) $request['support_sockets'];
 
-                    $client->write (new Http . $this->encode (array_map (fn ($client) => $client->toArray (), $this->clients)));
+                    $client->write (new Http . $this->encode (array_map (function ($client)
+                    {
+                        return $client->toArray ();
+                    }, $this->clients)));
 
                     break;
 
@@ -46,17 +58,19 @@ class Tracker
                     if (!isset ($request['reciever']) || !isset ($request['data']) || !isset ($request['mask']) || !isset ($this->clients[$request['reciever']]))
                         break;
 
-                    $this->stack[$request['reciever']][] = [
+                    $this->stack[$request['reciever']][] = array
+                    (
                         'timestamp' => time (),
                         'author'    => $ip .':'. $port,
                         'data'      => $request['data'],
                         'mask'      => crc32 ($request['mask'])
-                    ];
+                    );
 
                     break;
 
                 case 'pop':
-                    $client->write (new Http . $this->encode ($this->stack[$ip .':'. $port] ?? []));
+                    $client->write (new Http . $this->encode (isset ($this->stack[$ip .':'. $port]) ?
+                        $this->stack[$ip .':'. $port] : array ()));
 
                     break;
 
@@ -71,7 +85,7 @@ class Tracker
         return $this;
     }
 
-    public function update (): Tracker
+    public function update ()
     {
         foreach ($this->clients as $address => $client)
             if (!$client->available ())
@@ -92,7 +106,7 @@ class Tracker
         return $this;
     }
 
-    public static function encode ($data): string
+    public static function encode ($data)
     {
         return urlencode (serialize ($data));
     }

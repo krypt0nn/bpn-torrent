@@ -4,13 +4,13 @@ namespace BPN;
 
 class User
 {
-    public ?string $ip  = null;
-    public int $port    = 53236;
-    public int $userTtl = 600;
-    public int $lastUpdate;
-    public bool $supportSockets = false;
+    public $ip;
+    public $port = 53236;
+    public $userTtl = 600;
+    public $lastUpdate;
+    public $supportSockets = false;
 
-    public function __construct (string $ip = null, int $port = 53236)
+    public function __construct ($ip = null, $port = 53236)
     {
         $this->ip   = $ip;
         $this->port = $port;
@@ -18,14 +18,14 @@ class User
         $this->lastUpdate = time ();
     }
 
-    public function available (): bool
+    public function available ()
     {
         return time () - $this->lastUpdate < $this->userTtl;
     }
 
-    public function toArray (): array
+    public function toArray ()
     {
-        $array = [];
+        $array = array ();
 
         foreach (get_object_vars ($this) as $id => $value)
             $array[$id] = $value;
@@ -33,7 +33,7 @@ class User
         return $array;
     }
 
-    public function fromArray (array $user): User
+    public function fromArray ($user)
     {
         foreach ($user as $id => $value)
             $this->$id = $value;

@@ -4,14 +4,14 @@ namespace BPN;
 
 class Pool
 {
-    public string $ip    = '127.0.0.1';
-    public int $port     = 53236;
-    public int $selfPort = 53236;
-    public bool $supportSockets = false;
+    public $ip       = '127.0.0.1';
+    public $port     = 53236;
+    public $selfPort = 53236;
+    public $supportSockets = false;
 
-    public array $clients = [];
+    public $clients = array ();
 
-    public function __construct (string $ip, int $port = 53236, int $selfPort = 53236, bool $supportSockets = false)
+    public function __construct ($ip, $port = 53236, $selfPort = 53236, $supportSockets = false)
     {
         $this->ip   = $ip;
         $this->port = $port;
@@ -21,17 +21,18 @@ class Pool
         $this->update ();
     }
 
-    public function update (): Pool
+    public function update ()
     {
-        $response = Tracker::decode (@file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+        $response = Tracker::decode (@file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode (array (
             'type' => 'connect',
             'port' => $this->selfPort,
             'support_sockets' => $this->supportSockets
-        ])));
+        ))));
 
         foreach ($response as $client)
         {
-            $client = (new User)->fromArray ($client);
+            $client = new User;
+            $client = $client->fromArray ($client);
 
             $this->clients[$client->ip .':'. $client->port] = $client;
         }
@@ -39,9 +40,10 @@ class Pool
         return $this;
     }
 
-    public function user (string $ip, int $port = 53236): ?User
+    public function user ($ip, $port = 53236)
     {
-        return $this->clients[$ip .':'. $port] ?? null;
+        return isset ($this->clients[$ip .':'. $port]) ?
+            $this->clients[$ip .':'. $port] : null;
     }
 
     /**
@@ -50,24 +52,24 @@ class Pool
      * @param mixed $data  - информация для отправки
      * @param string $mask - маска запроса (нужна для индексации единых запросов в разных трекерах)
      */
-    public function push (string $ip, int $port, $data, string $mask): Pool
+    public function push ($ip, $port, $data, $mask)
     {
-        @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+        @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode (array (
             'type'     => 'push',
             'port'     => $this->selfPort,
             'reciever' => $ip .':'. $port,
             'data'     => $data,
             'mask'     => $mask
-        ]));
+        )));
 
         return $this;
     }
 
-    public function pop (): array
+    public function pop ()
     {
-        return Tracker::decode (@file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+        return Tracker::decode (@file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode (array (
             'type' => 'pop',
             'port' => $this->selfPort
-        ])));
+        ))));
     }
 }

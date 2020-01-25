@@ -4,16 +4,16 @@ namespace BPN;
 
 class Node
 {
-    public int $port = 53236;
+    public $port = 53236;
     public $socket;
 
-    public function __construct (int $port = 53236)
+    public function __construct ($port = 53236)
     {
         $this->port   = $port;
         $this->socket = socket_create_listen ($port);
     }
 
-    public function listen (callable $callback, bool $cycle = false): Node
+    public function listen ($callback, $cycle = false)
     {
         do
         {

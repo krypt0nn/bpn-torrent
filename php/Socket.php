@@ -4,11 +4,11 @@ namespace BPN;
 
 class Socket
 {
-    public ?string $ip = null;
-    public int $port;
+    public $ip;
+    public $port;
     public $socket;
 
-    public function __construct ($socket = '127.0.0.1', int $port = 53236)
+    public function __construct ($socket = '127.0.0.1', $port = 53236)
     {
         if (is_resource ($socket))
             $this->socket = $socket;
@@ -27,7 +27,7 @@ class Socket
         socket_set_nonblock ($this->socket);
     }
 
-    public function connect (): Socket
+    public function connect ()
     {
         if (!$this->ip)
             throw new \Exception ('Socket IP not specified');
@@ -37,7 +37,7 @@ class Socket
         return $this;
     }
 
-    public function bind (): Socket
+    public function bind ()
     {
         if (!$this->ip)
             throw new \Exception ('Socket IP not specified');
@@ -48,14 +48,14 @@ class Socket
         return $this;
     }
 
-    public function listen (): Socket
+    public function listen ()
     {
         socket_listen ($this->socket);
         
         return new Socket (socket_accept ($this->socket));
     }
 
-    public function read (): string
+    public function read ()
     {
         $read = '';
 
@@ -65,14 +65,14 @@ class Socket
         return $read;
     }
 
-    public function write (string $data): Socket
+    public function write (string $data)
     {
         socket_write ($this->socket, $data);
 
         return $this;
     }
 
-    public function close (): void
+    public function close ()
     {
         socket_close ($this->socket);
     }
