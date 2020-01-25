@@ -111,7 +111,7 @@ class Tracker
         return urlencode (serialize ($data));
     }
 
-    public static function decode (string $data)
+    public static function decode ($data)
     {
         return unserialize (urldecode ($data));
     }
