@@ -11,7 +11,7 @@ class Client
 
     public function __construct (int $port = 53236, string $ip = null, bool $supportSockets = false)
     {
-        $this->ip = $ip ?? (@file_get_contents ('http://api.ipify.org') ?: '127.0.0.1');
+        $this->ip = $ip ?? @file_get_contents ('http://api.ipify.org');
 
         $this->node = new Node ($port);
         $this->supportSockets = $supportSockets;
@@ -19,7 +19,7 @@ class Client
 
     public function connect (string $ip, int $port = 53236): Client
     {
-        $this->trackers[$ip .':'. $port] = new Pool ($ip, $port, $this->node->port, $this->supportSockets);
+        $this->trackers[$ip .':'. $port] = new Pool ($ip, $port, $this->ip, $this->node->port, $this->supportSockets);
 
         return $this;
     }
