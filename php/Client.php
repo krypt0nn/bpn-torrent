@@ -14,16 +14,13 @@ class Client
         $this->ip = $ip === null ?
             @file_get_contents ('http://api.ipify.org') : $ip;
 
-        if (!$this->ip)
-            $this->ip = '127.0.0.1';
-
         $this->node = new Node ($port);
         $this->supportSockets = $supportSockets;
     }
 
     public function connect ($ip, $port = 53236)
     {
-        $this->trackers[$ip .':'. $port] = new Pool ($ip, $port, $this->node->port, $this->supportSockets);
+        $this->trackers[$ip .':'. $port] = new Pool ($ip, $port, $this->ip, $this->node->port, $this->supportSockets);
 
         return $this;
     }
