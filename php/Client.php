@@ -56,7 +56,7 @@ class Client
             }
         }
 
-        $mask = sha1 (uniqid (rand (PHP_INT_MIN, PHP_INT_MAX), true));
+        $mask = sha1 (uniqid (rand (-1000000, 1000000) . microtime (true), true));
 
         foreach ($this->trackers as $tracker)
             $tracker->push ($ip, $port, $data, $mask);
