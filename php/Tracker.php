@@ -30,7 +30,7 @@ class Tracker
             switch ($request['type'] ?? null)
             {
                 case 'available':
-                    $client->write (new Http . $this->encode ('yes'));
+                    $client->write (new Http . $this->encode ('ok'));
 
                     break;
 
@@ -52,6 +52,8 @@ class Tracker
                         'data'      => $request['data'],
                         'mask'      => crc32 ($request['mask'])
                     ];
+
+                    $client->write (new Http . $this->encode ('ok'));
 
                     break;
 
