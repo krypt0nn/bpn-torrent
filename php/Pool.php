@@ -4,18 +4,20 @@ namespace BPN;
 
 class Pool
 {
-    public string $ip    = '127.0.0.1';
-    public int $port     = 53236;
-    public int $selfPort = 53236;
+    public string $ip      = '127.0.0.1';
+    public int $port       = 53236;
+    public ?string $selfIp = null;
+    public int $selfPort   = 53236;
     public bool $supportSockets = false;
 
     public array $clients = [];
     public int $requestsRepeats = 3;
 
-    public function __construct (string $ip, int $port = 53236, int $selfPort = 53236, bool $supportSockets = false)
+    public function __construct (string $ip, int $port = 53236, string $selfIp = null, int $selfPort = 53236, bool $supportSockets = false)
     {
-        $this->ip   = $ip;
-        $this->port = $port;
+        $this->ip       = $ip;
+        $this->port     = $port;
+        $this->selfIp   = $selfIp;
         $this->selfPort = $selfPort;
         $this->supportSockets = $supportSockets;
 
@@ -29,8 +31,9 @@ class Pool
         do
         {
             $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
-                'type' => 'connect',
-                'port' => $this->selfPort,
+                'type'     => 'connect',
+                'port'     => $this->selfPort,
+                'loopback' => $this->selfIp,
                 'support_sockets' => $this->supportSockets
             ]));
         }
@@ -70,6 +73,7 @@ class Pool
             $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
                 'type'     => 'push',
                 'port'     => $this->selfPort,
+                'loopback' => $this->selfIp,
                 'reciever' => $ip .':'. $port,
                 'data'     => $data,
                 'mask'     => $mask
@@ -88,8 +92,9 @@ class Pool
         do
         {
             $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
-                'type' => 'pop',
-                'port' => $this->selfPort
+                'type'     => 'pop',
+                'port'     => $this->selfPort,
+                'loopback' => $this->selfIp
             ]));
         }
 

@@ -21,7 +21,11 @@ class Tracker
         {
             $request = $this->decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
 
-            socket_getpeername ($client->socket, $ip);
+            if (isset ($request['loopback']) && is_string ($request['loopback']))
+                $ip = $request['loopback'];
+
+            else socket_getpeername ($client->socket, $ip);
+
             $port = min (max ((int) $request['port'], 1), 65535) ?? 53236;
 
             if (isset ($this->clients[$ip .':'. $port]))

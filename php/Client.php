@@ -4,12 +4,15 @@ namespace BPN;
 
 class Client
 {
+    public string $ip = '127.0.0.1';
     public Node $node;
     public array $trackers = [];
     public bool $supportSockets = false;
 
-    public function __construct (int $port = 53236, bool $supportSockets = false)
+    public function __construct (int $port = 53236, string $ip = null, bool $supportSockets = false)
     {
+        $this->ip = $ip ?? (@file_get_contents ('http://api.ipify.org') ?: '127.0.0.1');
+
         $this->node = new Node ($port);
         $this->supportSockets = $supportSockets;
     }
