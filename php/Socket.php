@@ -8,6 +8,8 @@ class Socket
     public $port;
     public $socket;
 
+    public $sendRepeats = 3;
+
     public function __construct ($socket = '127.0.0.1', $port = 53236)
     {
         if (is_resource ($socket))
@@ -67,7 +69,14 @@ class Socket
 
     public function write ($data)
     {
-        socket_write ($this->socket, $data);
+        $count = 0;
+        
+        do
+        {
+            $response = socket_write ($this->socket, $data);
+        }
+
+        while ($response === false && $count++ < $this->sendRepeats);
 
         return $this;
     }
