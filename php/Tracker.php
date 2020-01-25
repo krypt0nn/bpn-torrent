@@ -26,7 +26,11 @@ class Tracker
             if (!isset ($request['port']))
                 $request['port'] = 53236;
 
-            socket_getpeername ($client->socket, $ip);
+            if (isset ($request['loopback']) && is_string ($request['loopback']))
+                $ip = $request['loopback'];
+
+            else socket_getpeername ($client->socket, $ip);
+
             $port = min (max ((int) $request['port'], 1), 65535);
 
             if (isset ($self->clients[$ip .':'. $port]))

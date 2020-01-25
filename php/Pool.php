@@ -6,16 +6,18 @@ class Pool
 {
     public $ip       = '127.0.0.1';
     public $port     = 53236;
+    public $selfIp   = null;
     public $selfPort = 53236;
     public $supportSockets = false;
     
     public $clients = array ();
     public $requestsRepeats = 3;
 
-    public function __construct ($ip, $port = 53236, $selfPort = 53236, $supportSockets = false)
+    public function __construct ($ip, $port = 53236, $selfIp = null, $selfPort = 53236, $supportSockets = false)
     {
-        $this->ip   = $ip;
-        $this->port = $port;
+        $this->ip       = $ip;
+        $this->port     = $port;
+        $this->selfIp   = $selfIp;
         $this->selfPort = $selfPort;
         $this->supportSockets = $supportSockets;
 
@@ -29,8 +31,9 @@ class Pool
         do
         {
             $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode (array (
-                'type' => 'connect',
-                'port' => $this->selfPort,
+                'type'     => 'connect',
+                'port'     => $this->selfPort,
+                'loopback' => $this->selfIp,
                 'support_sockets' => $this->supportSockets
             )));
         }
@@ -72,6 +75,7 @@ class Pool
             $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode (array (
                 'type'     => 'push',
                 'port'     => $this->selfPort,
+                'loopback' => $this->selfIp,
                 'reciever' => $ip .':'. $port,
                 'data'     => $data,
                 'mask'     => $mask
@@ -90,8 +94,9 @@ class Pool
         do
         {
             $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode (array (
-                'type' => 'pop',
-                'port' => $this->selfPort
+                'type'     => 'pop',
+                'port'     => $this->selfPort,
+                'loopback' => $this->selfIp
             )));
         }
 
