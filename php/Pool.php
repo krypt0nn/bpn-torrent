@@ -10,6 +10,7 @@ class Pool
     public bool $supportSockets = false;
 
     public array $clients = [];
+    public int $requestsRepeats = 5;
 
     public function __construct (string $ip, int $port = 53236, int $selfPort = 53236, bool $supportSockets = false)
     {
@@ -23,18 +24,28 @@ class Pool
 
     public function update (): Pool
     {
-        $response = Tracker::decode (@file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
-            'type' => 'connect',
-            'port' => $this->selfPort,
-            'support_sockets' => $this->supportSockets
-        ])));
+        $count = 0;
 
-        foreach ($response as $client)
+        do
         {
-            $client = (new User)->fromArray ($client);
-
-            $this->clients[$client->ip .':'. $client->port] = $client;
+            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+                'type' => 'connect',
+                'port' => $this->selfPort,
+                'support_sockets' => $this->supportSockets
+            ]));
         }
+
+        while (!$response && $count++ < $this->requestsRepeats);
+
+        $response = @Tracker::decode ($response);
+
+        if (is_array ($response))
+            foreach ($response as $client)
+            {
+                $client = (new User)->fromArray ($client);
+
+                $this->clients[$client->ip .':'. $client->port] = $client;
+            }
 
         return $this;
     }
@@ -52,22 +63,38 @@ class Pool
      */
     public function push (string $ip, int $port, $data, string $mask): Pool
     {
-        @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
-            'type'     => 'push',
-            'port'     => $this->selfPort,
-            'reciever' => $ip .':'. $port,
-            'data'     => $data,
-            'mask'     => $mask
-        ]));
+        $count = 0;
+
+        do
+        {
+            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+                'type'     => 'push',
+                'port'     => $this->selfPort,
+                'reciever' => $ip .':'. $port,
+                'data'     => $data,
+                'mask'     => $mask
+            ]));
+        }
+
+        while ((!$response || @Tracker::decode ($response) != 'ok') && $count++ < $this->requestsRepeats);
 
         return $this;
     }
 
     public function pop (): array
     {
-        return Tracker::decode (@file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
-            'type' => 'pop',
-            'port' => $this->selfPort
-        ])));
+        $count = 0;
+        
+        do
+        {
+            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+                'type' => 'pop',
+                'port' => $this->selfPort
+            ]));
+        }
+
+        while (!$response && $count++ < $this->requestsRepeats);
+
+        return Tracker::decode ($response);
     }
 }
