@@ -21,6 +21,8 @@
 
 namespace BPN;
 
+require 'ext/DH-Generator/Generator.php';
+
 require 'php/Socket.php';
 require 'php/Node.php';
 require 'php/Http.php';

@@ -2,6 +2,8 @@
 
 namespace BPN;
 
+use DHGenerator\Generator;
+
 class Tracker
 {
     public Node $node;
@@ -21,12 +23,15 @@ class Tracker
         {
             $request = $this->decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
 
+            if (!$request)
+                return;
+
             if (isset ($request['loopback']) && is_string ($request['loopback']))
                 $ip = $request['loopback'];
 
             else socket_getpeername ($client->socket, $ip);
 
-            $port = min (max ((int) $request['port'], 1), 65535) ?? 53236;
+            $port = min (max ((int) $request['port'] ?? 53236, 1), 65535);
 
             if (isset ($this->clients[$ip .':'. $port]))
                 $this->clients[$ip .':'. $port]->lastUpdate = time ();
@@ -42,7 +47,12 @@ class Tracker
                     $this->clients[$ip .':'. $port] = new User ($ip, $port);
                     $this->clients[$ip .':'. $port]->supportSockets = (bool) $request['support_sockets'] ?? false;
 
-                    $client->write (new Http . $this->encode (array_map (fn ($client) => $client->toArray (), $this->clients)));
+                    $this->clients[$ip .':'. $port]->secret = Pool::expand (($generator = new Generator ($request['g'], $request['p']))->generate ($request['alpha']));
+
+                    $client->write (new Http . $this->encode ([
+                        'alpha'   => $generator->getAlpha (),
+                        'clients' => array_map (fn ($client) => $client->toArray (), $this->clients)
+                    ]));
 
                     break;
 
@@ -52,8 +62,8 @@ class Tracker
 
                     $this->stack[$request['reciever']][] = [
                         'timestamp' => time (),
-                        'author'    => $ip .':'. $port,
-                        'data'      => $request['data'],
+                        'author'    => $ip .':'. $port, // Расшифровать полученные данные от ключа отправителя и зашифровать их ключём получателя
+                        'data'      => $this->xorcode ($this->xorcode ($request['data'], $this->clients[$ip .':'. $port]->secret), $this->clients[$request['reciever']]->secret),
                         'mask'      => crc32 ($request['mask'])
                     ];
 
@@ -108,5 +118,10 @@ class Tracker
     public static function decode (string $data)
     {
         return unserialize (urldecode ($data));
+    }
+
+    public static function xorcode (string $data, string $key): string
+    {
+        return $data ^ str_repeat ($key, ceil (strlen ($data) / strlen ($key)));
     }
 }

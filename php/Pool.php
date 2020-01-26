@@ -2,6 +2,8 @@
 
 namespace BPN;
 
+use DHGenerator\Generator;
+
 class Pool
 {
     public string $ip      = '127.0.0.1';
@@ -13,6 +15,9 @@ class Pool
     public array $clients = [];
     public int $requestsRepeats = 3;
 
+    public Generator $generator;
+    public string $secret = '`';
+
     public function __construct (string $ip, int $port = 53236, string $selfIp = null, int $selfPort = 53236, bool $supportSockets = false)
     {
         $this->ip       = $ip;
@@ -20,6 +25,8 @@ class Pool
         $this->selfIp   = $selfIp;
         $this->selfPort = $selfPort;
         $this->supportSockets = $supportSockets;
+
+        $this->generator = new Generator (rand (100000000, 999999999), rand (100000000, 999999999));
 
         $this->update ();
     }
@@ -34,7 +41,10 @@ class Pool
                 'type'     => 'connect',
                 'port'     => $this->selfPort,
                 'loopback' => $this->selfIp,
-                'support_sockets' => $this->supportSockets
+                'support_sockets' => $this->supportSockets,
+                'g'     => $this->generator->g,
+                'p'     => $this->generator->p,
+                'alpha' => $this->generator->getAlpha ()
             ]));
         }
 
@@ -43,12 +53,16 @@ class Pool
         $response = @Tracker::decode ($response);
 
         if (is_array ($response))
-            foreach ($response as $client)
+        {
+            $this->secret = $this->generator->generate ($response['alpha']);
+
+            foreach ($response['clients'] as $client)
             {
                 $client = (new User)->fromArray ($client);
 
                 $this->clients[$client->ip .':'. $client->port] = $client;
             }
+        }
 
         return $this;
     }
@@ -75,7 +89,7 @@ class Pool
                 'port'     => $this->selfPort,
                 'loopback' => $this->selfIp,
                 'reciever' => $ip .':'. $port,
-                'data'     => $data,
+                'data'     => $this->xorcode ($data),
                 'mask'     => $mask
             ]));
         }
@@ -100,6 +114,21 @@ class Pool
 
         while (!$response && $count++ < $this->requestsRepeats);
 
-        return Tracker::decode ($response);
+        $response = @Tracker::decode ($response) ?: [];
+
+        foreach ($response as &$value)
+            $value['data'] = $this->xorcode ($value['data']);
+
+        return $response;
+    }
+
+    public function xorcode (string $data): string
+    {
+        return $data ^ str_repeat ($this->secret, ceil (strlen ($data) / strlen ($this->secret)));
+    }
+
+    public static function expand (string $secret): string
+    {
+        return urlencode (hash ('sha512', $secret, true));
     }
 }
