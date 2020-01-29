@@ -76,7 +76,7 @@ class Generator
      * 
      * @return int
      */
-    public function getAlpha (): int
+    public function getAlpha ()
     {
         return $this->alpha;
     }
@@ -90,7 +90,7 @@ class Generator
      * 
      * @throws \Exception - выбрасывает исключение если $alpha < 1
      */
-    public function generate (int $alpha): int
+    public function generate ($alpha)
     {
         if ($alpha < 1)
             throw new \Exception ('$alpha param must be upper than 1');
@@ -113,7 +113,7 @@ class Generator
      * 
      * @return int
      */
-    protected function powmod (int $base, int $exp, int $mod): int
+    protected function powmod ($base, $exp, $mod)
     {
         $result = 1;
 
