@@ -70,13 +70,13 @@ class Tracker
                 $this->clients[$ip .':'. $port]->secret = urlencode (hash ('sha512',
                     $generator->generate ($request['alpha']), true));
 
-                echo $this->encode (self::encode (array (
+                echo $this->encode (array (
                     'alpha'   => $generator->getAlpha (),
                     'clients' => array_map (function ($client)
                     {
                         return $client->toArray ();
                     }, $self->clients)
-                )));
+                ));
 
                 break;
 

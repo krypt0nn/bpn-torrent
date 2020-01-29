@@ -31,5 +31,3 @@ $tracker = new Tracker;
 $tracker->update ();
 
 $tracker->processRequest (substr ($_SERVER['REQUEST_URI'], 1));
-
-$tracker->__destruct ();
