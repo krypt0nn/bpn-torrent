@@ -60,7 +60,7 @@ class Generator
         $this->bcmathEnabled = extension_loaded ('bcmath');
         $this->gmpEnabled    = extension_loaded ('gmp');
 
-        $this->num = $num ?: random_int (100000, ($this->bcmathEnabled || $this->gmpEnabled) ? 999999999 : 999999);
+        $this->num = $num ?: rand (100000, ($this->bcmathEnabled || $this->gmpEnabled) ? 999999999 : 999999);
 
         if ($this->bcmathEnabled)
             $this->alpha = (int) bcpowmod ((string) $g, (string) $this->num, (string) $p);
