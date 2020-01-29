@@ -49,7 +49,7 @@ class Generator
      * echo 'A: '. $A->generate ($B->getAlpha ()) . PHP_EOL;
      * echo 'B: '. $B->generate ($A->getAlpha ());
      */
-    public function __construct (int $g, int $p, int $num = null)
+    public function __construct ($g, $p, $num = null)
     {
         if ($g < 1 || $p < 1 || ($num !== null && $num < 1))
             throw new \Exception ('Generator params must be upper than 1');
@@ -60,7 +60,7 @@ class Generator
         $this->bcmathEnabled = extension_loaded ('bcmath');
         $this->gmpEnabled    = extension_loaded ('gmp');
 
-        $this->num = $num ?: random_int (100000, ($this->bcmathEnabled || $this->gmpEnabled) ? 999999999 : 999999);
+        $this->num = $num ?: rand (100000, ($this->bcmathEnabled || $this->gmpEnabled) ? 999999999 : 999999);
 
         if ($this->bcmathEnabled)
             $this->alpha = (int) bcpowmod ((string) $g, (string) $this->num, (string) $p);
@@ -76,7 +76,7 @@ class Generator
      * 
      * @return int
      */
-    public function getAlpha (): int
+    public function getAlpha ()
     {
         return $this->alpha;
     }
@@ -90,7 +90,7 @@ class Generator
      * 
      * @throws \Exception - выбрасывает исключение если $alpha < 1
      */
-    public function generate (int $alpha): int
+    public function generate ($alpha)
     {
         if ($alpha < 1)
             throw new \Exception ('$alpha param must be upper than 1');
@@ -113,7 +113,7 @@ class Generator
      * 
      * @return int
      */
-    protected function powmod (int $base, int $exp, int $mod): int
+    protected function powmod ($base, $exp, $mod)
     {
         $result = 1;
 

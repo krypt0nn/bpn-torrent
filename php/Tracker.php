@@ -6,10 +6,11 @@ use DHGenerator\Generator;
 
 class Tracker
 {
-    public array $clients = [];
-    public array $stack   = [];
+    public $node;
+    public $clients = array ();
+    public $stack   = array ();
 
-    public int $stackTtl = 3600;
+    public $stackTtl = 3600;
 
     public function __construct ()
     {
@@ -28,24 +29,30 @@ class Tracker
         file_put_contents ('tracker.data', $this->xorcode (serialize (get_object_vars ($this)), TRACKER_KEY));
     }
 
-    public function processRequest (string $request, callable $callback = null): Tracker
+    public function processRequest ($request, $callback = null)
     {
         $request = @$this->decode ($request);
 
         if (!$request)
             return $this;
 
+        if (!isset ($request['port']))
+            $request['port'] = 53236;
+
         if (isset ($request['loopback']) && is_string ($request['loopback']))
             $ip = $request['loopback'];
 
         else $ip = $_SERVER['REMOTE_ADDR'];
 
-        $port = min (max ((int) ($request['port'] ?? 53236), 1), 65535);
+        $port = min (max ((int) $request['port'], 1), 65535);
 
         if (isset ($this->clients[$ip .':'. $port]))
             $this->clients[$ip .':'. $port]->lastUpdate = time ();
 
-        switch ($request['type'] ?? null)
+        if (!isset ($request['type']))
+            $request['type'] = null;
+
+        switch ($request['type'])
         {
             case 'available':
                 echo $this->encode ('ok');
@@ -53,16 +60,23 @@ class Tracker
                 break;
 
             case 'connect':
+                if (!isset ($request['support_sockets']))
+                    $request['support_sockets'] = false;
+                
                 $this->clients[$ip .':'. $port] = new User ($ip, $port);
-                $this->clients[$ip .':'. $port]->supportSockets = (bool) $request['support_sockets'] ?? false;
+                $this->clients[$ip .':'. $port]->supportSockets = (bool) $request['support_sockets'];
 
+                $generator = new Generator ($request['g'], $request['p']);
                 $this->clients[$ip .':'. $port]->secret = urlencode (hash ('sha512',
-                    ($generator = new Generator ($request['g'], $request['p']))->generate ($request['alpha']), true));
+                    $generator->generate ($request['alpha']), true));
 
-                echo $this->encode ([
+                echo $this->encode (self::encode (array (
                     'alpha'   => $generator->getAlpha (),
-                    'clients' => array_map (fn ($client) => $client->toArray (), $this->clients)
-                ]);
+                    'clients' => array_map (function ($client)
+                    {
+                        return $client->toArray ();
+                    }, $self->clients)
+                )));
 
                 break;
 
@@ -70,19 +84,21 @@ class Tracker
                 if (!isset ($request['reciever']) || !isset ($request['data']) || !isset ($request['mask']) || !isset ($this->clients[$request['reciever']]))
                     break;
 
-                $this->stack[$request['reciever']][] = [
+                $this->stack[$request['reciever']][] = array
+                (
                     'timestamp' => time (),
                     'author'    => $ip .':'. $port, // Расшифровать полученные данные от ключа отправителя и зашифровать их ключём получателя
                     'data'      => $this->xorcode ($this->xorcode ($request['data'], $this->clients[$ip .':'. $port]->secret), $this->clients[$request['reciever']]->secret),
                     'mask'      => crc32 ($request['mask'])
-                ];
+                );
 
                 echo $this->encode ('ok');
 
                 break;
 
             case 'pop':
-                echo $this->encode ($this->stack[$ip .':'. $port] ?? []);
+                echo $this->encode (isset ($this->stack[$ip .':'. $port]) ?
+                    $this->stack[$ip .':'. $port] : array ());
 
                 unset ($this->stack[$ip .':'. $port]);
 
@@ -98,7 +114,7 @@ class Tracker
         return $this;
     }
 
-    public function update (): Tracker
+    public function update ()
     {
         foreach ($this->clients as $address => $client)
             if (!$client->available ())
@@ -119,17 +135,17 @@ class Tracker
         return $this;
     }
 
-    public static function encode ($data): string
+    public static function encode ($data)
     {
         return urlencode (base64_encode (serialize ($data)));
     }
 
-    public static function decode (string $data)
+    public static function decode ($data)
     {
         return unserialize (base64_decode (urldecode ($data)));
     }
 
-    public static function xorcode (string $data, string $key): string
+    public static function xorcode ($data, $key)
     {
         return $data ^ str_repeat ($key, ceil (strlen ($data) / strlen ($key)));
     }
