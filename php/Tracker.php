@@ -127,12 +127,12 @@ class Tracker
         return $this;
     }
 
-    public static function encode ($data): string
+    public static function encode ($data)
     {
         return urlencode (base64_encode (serialize ($data)));
     }
 
-    public static function decode (string $data)
+    public static function decode ($data)
     {
         return unserialize (base64_decode (urldecode ($data)));
     }
