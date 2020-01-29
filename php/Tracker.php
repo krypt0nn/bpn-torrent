@@ -21,7 +21,7 @@ class Tracker
     {
         $this->node->listen (function (string $request, Socket $client) use ($callback)
         {
-            $request = $this->decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
+            $request = @$this->decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
 
             if (!$request)
                 return;
@@ -31,7 +31,7 @@ class Tracker
 
             else socket_getpeername ($client->socket, $ip);
 
-            $port = min (max ((int) $request['port'] ?? 53236, 1), 65535);
+            $port = min (max ((int) ($request['port'] ?? 53236), 1), 65535);
 
             if (isset ($this->clients[$ip .':'. $port]))
                 $this->clients[$ip .':'. $port]->lastUpdate = time ();
@@ -112,12 +112,12 @@ class Tracker
 
     public static function encode ($data): string
     {
-        return urlencode (serialize ($data));
+        return urlencode (base64_encode (serialize ($data)));
     }
 
     public static function decode (string $data)
     {
-        return unserialize (urldecode ($data));
+        return unserialize (base64_decode (urldecode ($data)));
     }
 
     public static function xorcode (string $data, string $key): string
