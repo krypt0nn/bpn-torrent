@@ -31,4 +31,4 @@ if (!isset ($_GET['request']))
     die ();
 
 (new Tracker)->update ()
-    ->processRequest ($_GET['request']);
+    ->processRequest (substr ($_SERVER['REQUEST_URI'], 1));
