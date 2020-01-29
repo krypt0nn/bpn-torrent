@@ -10,6 +10,8 @@ class User
     public $lastUpdate;
     public $supportSockets = false;
 
+    public $secret = '`';
+
     public function __construct ($ip = null, $port = 53236)
     {
         $this->ip   = $ip;
@@ -27,7 +29,9 @@ class User
     {
         $array = array ();
 
-        foreach (get_object_vars ($this) as $id => $value)
+        foreach (array_diff (get_object_vars ($this), array (
+            'secret'
+        )) as $id => $value)
             $array[$id] = $value;
 
         return $array;

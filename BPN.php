@@ -17,13 +17,11 @@
  * VK:    <https://vk.com/technomindlp>
  *        <https://vk.com/hphp_convertation>
  * 
- * ! This version is an edition of the main repository for PHP 5.3
- * ! It is not developed separately and is not officially supported
- * ! May contain errors and take a long time to update
- * 
  */
 
 namespace BPN;
+
+require 'ext/DH-Generator/Generator.php';
 
 require 'php/Socket.php';
 require 'php/Node.php';
