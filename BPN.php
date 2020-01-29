@@ -21,12 +21,11 @@
 
 namespace BPN;
 
-require 'ext/DH-Generator/Generator.php';
+const TRACKER_KEY = 'EFJI#*$&(*#WEF(@Q#)(DFJSAO(@#*$)REFSKE)UJ*#@(&$';
 
-require 'php/Socket.php';
-require 'php/Node.php';
-require 'php/Http.php';
+require 'ext/DH-Generator/Generator.php';
 require 'php/User.php';
-require 'php/Pool.php';
 require 'php/Tracker.php';
-require 'php/Client.php';
+
+(new Tracker)->update ()
+    ->processRequest (substr ($_SERVER['REQUEST_URI'], 1));
