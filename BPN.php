@@ -27,5 +27,8 @@ require 'ext/DH-Generator/Generator.php';
 require 'php/User.php';
 require 'php/Tracker.php';
 
+if (!isset ($_GET['request']))
+    die ();
+
 (new Tracker)->update ()
-    ->processRequest (substr ($_SERVER['REQUEST_URI'], 1));
+    ->processRequest ($_GET['request']);

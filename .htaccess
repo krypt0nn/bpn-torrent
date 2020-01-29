@@ -1,4 +1,5 @@
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ /BPN.php/$0 [L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /BPN.php?request=$1 [L,QSA]
