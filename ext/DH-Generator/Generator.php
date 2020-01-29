@@ -49,7 +49,7 @@ class Generator
      * echo 'A: '. $A->generate ($B->getAlpha ()) . PHP_EOL;
      * echo 'B: '. $B->generate ($A->getAlpha ());
      */
-    public function __construct (int $g, int $p, int $num = null)
+    public function __construct ($g, $p, $num = null)
     {
         if ($g < 1 || $p < 1 || ($num !== null && $num < 1))
             throw new \Exception ('Generator params must be upper than 1');
