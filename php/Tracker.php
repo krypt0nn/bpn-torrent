@@ -23,7 +23,7 @@ class Tracker
 
         $this->node->listen (function ($request, $client) use ($callback, &$self)
         {
-            $request = Tracker::decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
+            $request = @Tracker::decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
 
             if (!$request)
                 return;
@@ -127,14 +127,14 @@ class Tracker
         return $this;
     }
 
-    public static function encode ($data)
+    public static function encode ($data): string
     {
-        return urlencode (serialize ($data));
+        return urlencode (base64_encode (serialize ($data)));
     }
 
-    public static function decode ($data)
+    public static function decode (string $data)
     {
-        return unserialize (urldecode ($data));
+        return unserialize (base64_decode (urldecode ($data)));
     }
 
     public static function xorcode ($data, $key)
