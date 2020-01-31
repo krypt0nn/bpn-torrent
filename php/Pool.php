@@ -75,10 +75,10 @@ class Pool
     /**
      * @param string $ip   - IP получателя
      * @param int $port    - port получателя
-     * @param mixed $data  - информация для отправки
+     * @param string $data - информация для отправки
      * @param string $mask - маска запроса (нужна для индексации единых запросов в разных трекерах)
      */
-    public function push (string $ip, int $port, $data, string $mask): Pool
+    public function push (string $ip, int $port, string $data, string $mask): Pool
     {
         $count = 0;
 
@@ -89,7 +89,7 @@ class Pool
                 'port'     => $this->selfPort,
                 'loopback' => $this->selfIp,
                 'reciever' => $ip .':'. $port,
-                'data'     => $this->xorcode (serialize ($data)),
+                'data'     => $this->xorcode ($data),
                 'mask'     => $mask
             ]));
         }
@@ -117,7 +117,7 @@ class Pool
         $response = @Tracker::decode ($response) ?: [];
 
         foreach ($response as &$value)
-            $value['data'] = @unserialize ($this->xorcode ($value['data']));
+            $value['data'] = $this->xorcode ($value['data']);
 
         return $response;
     }
