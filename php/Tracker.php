@@ -87,8 +87,8 @@ class Tracker
                 $this->stack[$request['reciever']][] = array
                 (
                     'timestamp' => time (),
-                    'author'    => $ip .':'. $port, // Расшифровать полученные данные от ключа отправителя и зашифровать их ключём получателя
-                    'data'      => $this->xorcode ($this->xorcode ($request['data'], $this->clients[$ip .':'. $port]->secret), $this->clients[$request['reciever']]->secret),
+                    'author'    => $ip .':'. $port,
+                    'data'      => $this->xorcode ($request['data'], $this->clients[$ip .':'. $port]->secret),
                     'mask'      => crc32 ($request['mask'])
                 );
 
@@ -98,7 +98,12 @@ class Tracker
 
             case 'pop':
                 echo $this->encode (isset ($this->stack[$ip .':'. $port]) ?
-                    $this->stack[$ip .':'. $port] : array ());
+                    array_map (function ($data) use ($request)
+                    {
+                        $data['data'] = $this->xorcode ($data['data'], $this->clients[$request['reciever']]->secret);
+
+                        return $data;
+                    }, $this->stack[$ip .':'. $port]) : array ());
 
                 unset ($this->stack[$ip .':'. $port]);
 
