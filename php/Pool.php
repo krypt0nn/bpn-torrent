@@ -89,7 +89,7 @@ class Pool
                 'port'     => $this->selfPort,
                 'loopback' => $this->selfIp,
                 'reciever' => $ip .':'. $port,
-                'data'     => $this->xorcode ($data),
+                'data'     => $this->xorcode (serialize ($data)),
                 'mask'     => $mask
             ]));
         }
@@ -117,7 +117,7 @@ class Pool
         $response = @Tracker::decode ($response) ?: [];
 
         foreach ($response as &$value)
-            $value['data'] = $this->xorcode ($value['data']);
+            $value['data'] = unserialize ($this->xorcode ($value['data']));
 
         return $response;
     }
