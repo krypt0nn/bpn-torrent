@@ -72,9 +72,9 @@ class Tracker
                     break;
 
                 case 'pop':
-                    $client->write (new Http . $this->encode (array_map (function ($data) use ($request)
+                    $client->write (new Http . $this->encode (array_map (function ($data) use ($request, $ip, $port)
                     {
-                        $data['data'] = $this->xorcode ($data['data'], $this->clients[$request['reciever']]->secret);
+                        $data['data'] = $this->xorcode ($data['data'], $this->clients[$request[$ip .':'. $port]]->secret);
 
                         return $data;
                     }, $this->stack[$ip .':'. $port]) ?? []));
