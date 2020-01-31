@@ -77,7 +77,7 @@ class Pool
     /**
      * @param string $ip   - IP получателя
      * @param int $port    - port получателя
-     * @param string $data - информация для отправки
+     * @param mixed $data  - информация для отправки
      * @param string $mask - маска запроса (нужна для индексации единых запросов в разных трекерах)
      */
     public function push ($ip, $port, $data, $mask)
@@ -91,7 +91,7 @@ class Pool
                 'port'     => $this->selfPort,
                 'loopback' => $this->selfIp,
                 'reciever' => $ip .':'. $port,
-                'data'     => $this->xorcode ($data),
+                'data'     => $this->xorcode (serialize ($data)),
                 'mask'     => $mask
             )));
         }
@@ -122,7 +122,7 @@ class Pool
             $response = array ();
 
         foreach ($response as &$value)
-            $value['data'] = $this->xorcode ($value['data']);
+            $value['data'] = @unserialize ($this->xorcode ($value['data']));
 
         return $response;
     }
