@@ -98,9 +98,9 @@ class Tracker
 
             case 'pop':
                 echo $this->encode (isset ($this->stack[$ip .':'. $port]) ?
-                    array_map (function ($data) use ($request)
+                    array_map (function ($data) use ($ip, $port)
                     {
-                        $data['data'] = $this->xorcode ($data['data'], $this->clients[$request['reciever']]->secret);
+                        $data['data'] = $this->xorcode ($data['data'], $this->clients[$ip .':'. $port]->secret);
 
                         return $data;
                     }, $this->stack[$ip .':'. $port]) : array ());
