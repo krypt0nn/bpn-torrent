@@ -122,7 +122,7 @@ class Pool
             $response = array ();
 
         foreach ($response as &$value)
-            $value['data'] = unserialize ($this->xorcode ($value['data']));
+            $value['data'] = @unserialize ($this->xorcode ($value['data']));
 
         return $response;
     }
