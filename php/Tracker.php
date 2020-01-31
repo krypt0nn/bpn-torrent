@@ -89,9 +89,9 @@ class Tracker
 
                 case 'pop':
                     $client->write (new Http . Tracker::encode (isset ($self->stack[$ip .':'. $port]) ?
-                        array_map (function ($data) use ($request, $self)
+                        array_map (function ($data) use ($ip, $port, $self)
                         {
-                            $data['data'] = $self->xorcode ($data['data'], $self->clients[$request['reciever']]->secret);
+                            $data['data'] = $self->xorcode ($data['data'], $self->clients[$ip .':'. $port]->secret);
 
                             return $data;
                         }, $self->stack[$ip .':'. $port]) : array ()));
