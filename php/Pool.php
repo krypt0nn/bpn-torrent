@@ -117,7 +117,7 @@ class Pool
         $response = @Tracker::decode ($response) ?: [];
 
         foreach ($response as &$value)
-            $value['data'] = unserialize ($this->xorcode ($value['data']));
+            $value['data'] = @unserialize ($this->xorcode ($value['data']));
 
         return $response;
     }
