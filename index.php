@@ -30,4 +30,5 @@ require 'php/Tracker.php';
 $tracker = new Tracker;
 $tracker->update ();
 
-$tracker->processRequest (substr ($_SERVER['REQUEST_URI'], 1));
+if (isset ($_GET['r']))
+    $tracker->processRequest ($_GET['r']);
