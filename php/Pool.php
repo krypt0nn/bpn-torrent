@@ -37,7 +37,7 @@ class Pool
 
         do
         {
-            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/?r='. Tracker::encode ([
                 'type'     => 'connect',
                 'port'     => $this->selfPort,
                 'loopback' => $this->selfIp,
@@ -84,7 +84,7 @@ class Pool
 
         do
         {
-            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/?r='. Tracker::encode ([
                 'type'     => 'push',
                 'port'     => $this->selfPort,
                 'loopback' => $this->selfIp,
@@ -105,7 +105,7 @@ class Pool
         
         do
         {
-            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/'. Tracker::encode ([
+            $response = @file_get_contents ('http://'. $this->ip .':'. $this->port .'/?r='. Tracker::encode ([
                 'type'     => 'pop',
                 'port'     => $this->selfPort,
                 'loopback' => $this->selfIp

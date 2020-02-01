@@ -53,7 +53,7 @@ class Client
 
             if ($support)
             {
-                @file_get_contents ('http://'. $ip .':'. $port .'/'. Tracker::encode ($data));
+                @file_get_contents ('http://'. $ip .':'. $port .'/?r='. Tracker::encode ($data));
 
                 return $this;
             }
@@ -82,7 +82,7 @@ class Client
     {
         $this->node->listen (function (string $request, Socket $client) use ($callback)
         {
-            $request = Tracker::decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
+            $request = Tracker::decode (substr ($request, 8, strpos ($request, ' HTTP/') - 8));
 
             $callback ($request, $client);
         }, $cycle);
