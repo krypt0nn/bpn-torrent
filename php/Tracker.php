@@ -75,7 +75,7 @@ class Tracker
                     'clients' => array_map (function ($client)
                     {
                         return $client->toArray ();
-                    }, $self->clients)
+                    }, $this->clients)
                 ));
 
                 break;
