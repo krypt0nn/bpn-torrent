@@ -23,7 +23,7 @@ class Tracker
 
         $this->node->listen (function ($request, $client) use ($callback, &$self)
         {
-            $request = @Tracker::decode (substr ($request, 5, strpos ($request, ' HTTP/') - 5));
+            $request = @Tracker::decode (substr ($request, 8, strpos ($request, ' HTTP/') - 8));
 
             if (!$request)
                 return;
