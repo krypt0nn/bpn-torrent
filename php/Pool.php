@@ -56,7 +56,7 @@ class Pool
         {
             $this->secret = $this->generator->generate ($response['alpha']);
 
-            foreach ($response['clients'] as $client)
+            foreach ($response['clients'] as $clientInfo)
             {
                 $client = new User;
                 $client = $client->fromArray ($clientInfo);
